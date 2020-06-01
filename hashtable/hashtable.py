@@ -183,7 +183,7 @@ if __name__ == "__main__":
     ht.put("line_10", "Long time the manxome foe he sought--")
     ht.put("line_11", "So rested he by the Tumtum tree")
     ht.put("line_12", "And stood awhile in thought.")
-    print(ht.data[5])
+
     print(ht.get('line_1'))
     print("")
 
