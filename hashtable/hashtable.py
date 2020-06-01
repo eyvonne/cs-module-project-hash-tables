@@ -52,7 +52,7 @@ class HashTable:
 
         Implement this.
         """
-        return sum([bool(x) for x in self.data]) / len(self.data)
+        return sum([bool(x) for x in self.data]) / self.get_num_slots()
 
     def fnv1(self, key):
         """
@@ -97,15 +97,13 @@ class HashTable:
             node = self.data[hash]
             while node.next is not None:
                 if node.key == key:
-                    node.set_value(value)
-                    return None
+                    break
                 node = node.next
             if node.key == key:
                 node.set_value(value)
-                return None
             else:
                 node.set_next(key, value)
-        # print(*self.data, sep='; ')
+        # self.manage_size() # lets get resize working first then I'll run that code.
 
     def delete(self, key):
         """
@@ -164,8 +162,22 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
-        pass
+        data = [x for x in self.data if x is not None]
+        self.data = [None] * new_capacity
+
+        for d in data:
+            if d.next is not None:
+                node = d
+                while node.next is not None:
+                    self.put(node.key, node.value)
+                    node = node.next
+                self.put(node.key, node.value)
+            else:
+                self.put(d.key, d.value)
+
+    def manage_size(self):
+        if self.get_load_factor > .7:
+            self.resize(self.capacity * 2)
 
 
 if __name__ == "__main__":
