@@ -2,10 +2,20 @@ class HashTableEntry:
     """
     Linked List hash table key/value pair
     """
+
     def __init__(self, key, value):
         self.key = key
         self.value = value
         self.next = None
+
+    def set_value(self, value):
+        self.value = value
+
+    def set_next(self, key, value):
+        self.next = HashTableEntry(key, value)
+
+    def __str__(self):
+        return f'key: {self.key}, value: {self.value}, next: {self.next}'
 
 
 # Hash table can't have fewer than this many slots
@@ -21,8 +31,8 @@ class HashTable:
     """
 
     def __init__(self, capacity):
-        # Your code here
-
+        self.data = [None] * capacity if capacity >= MIN_CAPACITY else [None] * MIN_CAPACITY
+        self.capacity = capacity if capacity >= MIN_CAPACITY else MIN_CAPACITY
 
     def get_num_slots(self):
         """
@@ -34,8 +44,7 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
-
+        return len(self.data)
 
     def get_load_factor(self):
         """
@@ -43,8 +52,7 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
-
+        return sum([bool(x) for x in self.data]) / len(self.data)
 
     def fnv1(self, key):
         """
@@ -52,9 +60,8 @@ class HashTable:
 
         Implement this, and/or DJB2.
         """
-
+        pass
         # Your code here
-
 
     def djb2(self, key):
         """
@@ -62,15 +69,17 @@ class HashTable:
 
         Implement this, and/or FNV-1.
         """
-        # Your code here
-
+        hash = 5381
+        for c in key:
+            hash = (hash * 33) + ord(c)
+        return hash
 
     def hash_index(self, key):
         """
         Take an arbitrary key and return a valid integer index
         between within the storage capacity of the hash table.
         """
-        #return self.fnv1(key) % self.capacity
+        # return self.fnv1(key) % self.capacity
         return self.djb2(key) % self.capacity
 
     def put(self, key, value):
@@ -81,8 +90,22 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
-
+        hash = self.hash_index(key)
+        if self.data[hash] is None:
+            self.data[hash] = HashTableEntry(key, value)
+        else:
+            node = self.data[hash]
+            while node.next is not None:
+                if node.key == key:
+                    node.set_value(value)
+                    return None
+                node = node.next
+            if node.key == key:
+                node.set_value(value)
+                return None
+            else:
+                node.set_next(key, value)
+        # print(*self.data, sep='; ')
 
     def delete(self, key):
         """
@@ -92,8 +115,20 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
-
+        hash = self.hash_index(key)
+        if self.data[hash] is None:
+            print(f'No Data at {key} to delete')
+            return None
+        elif self.data[hash].key == key:
+            if self.data[hash].next == None:
+                self.data[hash] = None
+            else:
+                self.data[hash] = self.data[hash].next
+        else:
+            node = self.data[hash]
+            while node.next.key is not key:
+                node = node.next
+            node.next = node.next.next
 
     def get(self, key):
         """
@@ -103,8 +138,24 @@ class HashTable:
 
         Implement this.
         """
-        # Your code here
-
+        print(f'getting key {key}', end=', ')
+        hash = self.hash_index(key)
+        if self.data[hash] is None:
+            return None
+        elif self.data[hash].key == key:
+            print(f'returning {self.data[hash].value}')
+            return self.data[hash].value
+        else:
+            node = self.data[hash]
+            while node.next is not None:
+                if node.key == key:
+                    print(f'returning {node.value}')
+                    return node.value
+                node = node.next
+            if node.key == key:
+                return node.value
+            else:
+                return None
 
     def resize(self, new_capacity):
         """
@@ -114,14 +165,14 @@ class HashTable:
         Implement this.
         """
         # Your code here
-
+        pass
 
 
 if __name__ == "__main__":
     ht = HashTable(8)
 
     ht.put("line_1", "'Twas brillig, and the slithy toves")
-    ht.put("line_2", "Did gyre and gimble in the wabe:")
+    ht.put("line_1", "Did gyre and gimble in the wabe:")
     ht.put("line_3", "All mimsy were the borogoves,")
     ht.put("line_4", "And the mome raths outgrabe.")
     ht.put("line_5", '"Beware the Jabberwock, my son!')
@@ -132,22 +183,23 @@ if __name__ == "__main__":
     ht.put("line_10", "Long time the manxome foe he sought--")
     ht.put("line_11", "So rested he by the Tumtum tree")
     ht.put("line_12", "And stood awhile in thought.")
-
+    print(ht.data[5])
+    print(ht.get('line_1'))
     print("")
 
     # Test storing beyond capacity
-    for i in range(1, 13):
-        print(ht.get(f"line_{i}"))
+    # for i in range(1, 13):
+    #     print(ht.get(f"line_{i}"))
 
     # Test resizing
-    old_capacity = ht.get_num_slots()
-    ht.resize(ht.capacity * 2)
-    new_capacity = ht.get_num_slots()
-
-    print(f"\nResized from {old_capacity} to {new_capacity}.\n")
+    # old_capacity = ht.get_num_slots()
+    # ht.resize(ht.capacity * 2)
+    # new_capacity = ht.get_num_slots()
+    #
+    # print(f"\nResized from {old_capacity} to {new_capacity}.\n")
 
     # Test if data intact after resizing
-    for i in range(1, 13):
-        print(ht.get(f"line_{i}"))
-
-    print("")
+    # for i in range(1, 13):
+    #     print(ht.get(f"line_{i}"))
+    #
+    # print("")
