@@ -124,7 +124,6 @@ class HashTable:
         hash = self.hash_index(key)
         if self.data[hash] is None:
             print(f'No Data at {key} to delete')
-            return None
         elif self.data[hash].key == key:
             if self.data[hash].next == None:
                 self.data[hash] = None
@@ -132,9 +131,13 @@ class HashTable:
                 self.data[hash] = self.data[hash].next
         else:
             node = self.data[hash]
-            while node.next.key is not key:
+            while node.next is not None and node.next.key is not key:
                 node = node.next
-            node.next = node.next.next
+            if node.next.key == key:
+                node.next = node.next.next
+            else:
+                print(f'No Data at {key} to delete')
+        self.manage_size()
 
     def get(self, key):
         """
@@ -168,8 +171,8 @@ class HashTable:
         Implement this.
         """
         data = [x for x in self.data if x is not None]
-        self.data = [None] * new_capacity
-        self.capacity = new_capacity
+        self.data = [None] * new_capacity if new_capacity >= MIN_CAPACITY else [None] * MIN_CAPACITY
+        self.capacity = new_capacity if new_capacity >= MIN_CAPACITY else MIN_CAPACITY
 
         for d in data:
             if d.next is not None:
@@ -181,13 +184,14 @@ class HashTable:
             else:
                 self.put(d.key, d.value)
 
-    def manage_size(self, index):
-        if self.get_load_factor() > .7 or len(self.data[index]) > 3:
-            if self.get_load_factor() > .7:
-                print(f'load factor increase {self.get_load_factor()}')
-            else:
-                print(f'length increase {len(self.data[index])}')
+    def manage_size(self, index=None):
+        if index is not None and len(self.data[index]) > 3:
             self.resize(self.capacity * 2)
+        elif self.get_load_factor() > .7:
+            self.resize(self.capacity * 2)
+            print(self.get_load_factor())
+        elif index is None and self.get_load_factor() < .3:
+            self.resize(int(self.capacity * .5))
 
 
 if __name__ == "__main__":
