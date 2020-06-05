@@ -1,6 +1,15 @@
 def no_dups(s):
     # Your code here
+    output = ''
+    cache = []
+    for word in s.split():
+        if word in cache:
+            pass
+        else:
+            output += word + ' '
+            cache.append(word)
 
+    return output.strip()
 
 
 if __name__ == "__main__":
